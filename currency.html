@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency</title>
+    <style>
+        p {
+            font-size: 2em;
+            padding: 1rem;
+            margin: 4px;
+
+        }
+
+        body{
+            padding: 0 200px;
+            background: #E0FFFF;
+        }
+
+        .text{
+            font-family: "Bahnschrift";
+            font-size: 32px;
+            text-align: justify;
+        }
+
+
+
+    </style>
+</head>
+<body>
+
+
+<div class="text">
+    <h1>Current rate</h1>
+<label><br>Select base currency:<br></label>
+<form id="from-form">
+    <label><input type="radio" name="type" value="USD" />US Dollar</label>
+    <br/>
+    <label><input type="radio" name="type" value="EUR" />Euro</label>
+    <br />
+    <label><input type="radio" name="type" value="RUB" checked/>Ruble</label>
+    <br />
+
+</form>
+
+<label><br>Select currency to exchange:<br></label>
+<form id="to-form">
+    <label><input type="radio" name="type" value="USD" />US Dollar</label>
+    <br/>
+    <label><input type="radio" name="type" value="EUR" />Euro</label>
+    <br />
+    <label><input type="radio" name="type" value="RUB" checked/>Ruble</label>
+    <br />
+
+
+</form>
+
+<p id="det-rate"></p>
+
+<button id="get-rate">Get a exchange rate</button>
+</div>
+<script>
+    const getRateButton = document.getElementById('get-rate');
+    const toForm = document.getElementById('to-form')
+    const typeForm = document.getElementById('from-form');
+    const rate_t = document.getElementById('det-rate');
+
+
+    function fetchSomeRate(currency) {
+        const params = new URLSearchParams();
+        if (currency) {
+            params.append('rates', currency);
+        }
+        return fetch('https://v6.exchangerate-api.com/v6/05ca2359115553bb3551cfda/latest/'+currency.toString())
+            .then(r => r.json());
+    }
+
+    function handle(rateObj, tovalue) {
+        const value = rateObj["conversion_rates"][tovalue];
+        const { base_code } = rateObj;
+        rate_t.textContent = "1 "+ base_code+" = " + value + " " + tovalue;
+        rate_t.classList.remove('active');
+    }
+
+    getRateButton.addEventListener('click', async function (e) {
+        rate_t.textContent = 'Loading...';
+        const currency_base = typeForm.elements.type.value;
+        const currency_to_convert = toForm.elements.type.value;
+        const rate_from = await fetchSomeRate(currency_base);
+        const rate_to = await fetchSomeRate(currency_to_convert);
+        const {base_code} = rate_to;
+        handle(rate_from, base_code)
+    });
+
+
+</script>
+</body>
+</html>
